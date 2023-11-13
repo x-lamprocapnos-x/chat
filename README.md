@@ -9,19 +9,19 @@
 - Expo
 - Expo-cli
 
-# ** Usage Guide**
+# **Usage Guide**
 - Messaging capabilties 
 - Location sharing
 - Image sharing
 
-# ** Features **
+# **Features**
 - coming soon
 
-# ** Screenshots or demo **
+# **Screenshots or demo**
 - coming soon
 
-# ** Api Documentation **
+# **Api Documentation**
 
-# ** Contributions **
+# **Contributions**
 
 ## Requirments
