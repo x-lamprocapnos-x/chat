@@ -9,17 +9,20 @@ import {
     TouchableOpacity
 } from 'react-native';
 
+// Start Component
 const Start = ({ navigation }) => {
     const [name, setName] = useState('');
     const [background, setBackground] = useState('white');
     const backgroundImage = require("../assets/bg-image.png");
-    const colors = ['#ffe1c7', '#cdffc7', '#caf3fc', '#caccfc', '#a9a9ab']
+    const colors = ['#a64e4e', '#a6704e', '#4ea64f', '#4e91a6', '#5f4ea6', '#686968']
 
     return (
-        <ImageBackground source={backgroundImage} resizeMode="cover" style={styles.image}>
+        <ImageBackground source={backgroundImage} resizeMode="cover" style={styles.image} alt='laughing people in blurred filter'>
+            <Text style={styles.title}>Chat App</Text>
             <View style={styles.inputContainer}>
 
                 <Text>Start a conversation!</Text>
+                {/* Username Input  */}
                 <TextInput
                     style={styles.textInput}
                     value={name}
@@ -30,7 +33,9 @@ const Start = ({ navigation }) => {
                     Choose a background color:
                 </Text>
                 <View style={styles.colorList}>
+                    {/* Background Select for Chats */}
                     {colors.map((color, index) => (
+
                         <TouchableOpacity
                             key={index}
                             style={[
@@ -41,8 +46,7 @@ const Start = ({ navigation }) => {
                         </TouchableOpacity>
                     ))}
                 </View>
-
-
+                {/* Button to Chats page */}
                 <Button
                     title='Go to Chats'
                     onPress={() => navigation.navigate('Chat', { name: name, background: background })}
@@ -54,6 +58,15 @@ const Start = ({ navigation }) => {
 
 // style guide
 const styles = StyleSheet.create({
+    title: {
+        flex: 0.5,
+        fontSize: 45,
+        color: '#fff',
+        width: '100%',
+        textAlign: 'center',
+        fontWeight: '700'
+    },
+
     inputContainer: {
         backgroundColor: '#ffffff',
         padding: '5%',
@@ -64,7 +77,7 @@ const styles = StyleSheet.create({
     textInput: {
         fontSize: 16,
         width: '90%',
-        padding: 15,
+        padding: 10,
         borderWidth: 1,
         marginTop: 15,
         marginBottom: 15
@@ -85,10 +98,10 @@ const styles = StyleSheet.create({
     },
 
     box: {
-        width: 30,
-        height: 30,
-        margin: 10,
-        borderRadius: 15,
+        width: 45,
+        height: 45,
+        margin: 5,
+        borderRadius: 50,
     },
 
     selected: {
@@ -96,6 +109,8 @@ const styles = StyleSheet.create({
         borderColor: 'black',
     }
 
+
 });
 
+// Export Start Component
 export default Start;
