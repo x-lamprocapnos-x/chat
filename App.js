@@ -9,6 +9,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 // Create the navigator
 const Stack = createNativeStackNavigator();
 
+// App Component
 const App = () => {
   return (
     <NavigationContainer>
@@ -38,4 +39,5 @@ const styles = StyleSheet.create({
   },
 });
 
+//Export App Component
 export default App;
