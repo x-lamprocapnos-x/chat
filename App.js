@@ -1,16 +1,36 @@
-// import screens 1 and 2
-import Start from './components/Start';
-import Chat from './components/Chat';
-
-import { StyleSheet } from 'react-native';
+import { StyleSheet, LogBox } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+// import screens
+import Start from './components/Start';
+import Chat from './components/Chat';
+
+// initialize firebase
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+
 // Create the navigator
 const Stack = createNativeStackNavigator();
+LogBox.ignoreLogs(["AsyncStorage has been extracted from"]);
 
 // App Component
 const App = () => {
+  const firebaseConfig = {
+    apiKey: "AIzaSyAxmpadaPOlCjfxCPfRL4HTvWPW-cf1n2c",
+    authDomain: "chatapp-9b3e1.firebaseapp.com",
+    projectId: "chatapp-9b3e1",
+    storageBucket: "chatapp-9b3e1.appspot.com",
+    messagingSenderId: "274272467721",
+    appId: "1:274272467721:web:f07b93d3c70f4ddd08f1d8"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+
+  // Initialize Cloud Firestore and get a reference to the service
+  const db = getFirestore(app);
+
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -18,12 +38,16 @@ const App = () => {
       >
         <Stack.Screen
           name='Start'
-          component={Start}
-        />
+        >
+          {props => <Start db={db} {...props} />}
+        </Stack.Screen>
+
         <Stack.Screen
           name='Chat'
-          component={Chat}
-        />
+        >
+          {props => <Chat db={db} {...props} />}
+
+        </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );
