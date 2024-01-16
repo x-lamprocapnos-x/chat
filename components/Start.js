@@ -6,15 +6,30 @@ import {
     Button,
     TextInput,
     ImageBackground,
-    TouchableOpacity
+    TouchableOpacity,
+    Alert
 } from 'react-native';
+// import anonymous sign in from firebase
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 // Start Component
 const Start = ({ navigation }) => {
+    const auth = getAuth();
     const [name, setName] = useState('');
     const [background, setBackground] = useState('white');
     const backgroundImage = require("../assets/bg-image.png");
     const colors = ['#a64e4e', '#a6704e', '#4ea64f', '#4e91a6', '#5f4ea6', '#686968']
+
+    const signInUser = () => {
+        signInAnonymously(auth)
+            .then(result => {
+                navigation.navigate("Chat", { userID: result.user.uid, name: name, background: background });
+                Alert.alert("Signed in Successfully!");
+            })
+            .catch((error) => {
+                Alert.alert("Unable to sign in, try later again.");
+            })
+    }
 
     return (
         <ImageBackground source={backgroundImage} resizeMode="cover" style={styles.image} alt='laughing people in blurred filter'>
@@ -47,10 +62,10 @@ const Start = ({ navigation }) => {
                     ))}
                 </View>
                 {/* Button to Chats page */}
-                <Button
-                    title='Go to Chats'
-                    onPress={() => navigation.navigate('Chat', { name: name, background: background })}
-                />
+                <TouchableOpacity style={styles.startButton} onPress={signInUser}>
+                    <Text style={styles.startButtonText}> Go to Chat</Text>
+
+                </TouchableOpacity>
             </View>
         </ImageBackground>
     );
@@ -107,6 +122,16 @@ const styles = StyleSheet.create({
     selected: {
         borderWidth: 2,
         borderColor: 'black',
+    },
+    startButton: {
+        width: '90%',
+        height: 50,
+        marginBottom: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    startButtonText: {
+        fontSize: 16,
     }
 
 
