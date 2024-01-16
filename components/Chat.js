@@ -7,38 +7,41 @@ import {
     Platform
 } from 'react-native';
 import { Bubble, GiftedChat } from "react-native-gifted-chat";
+import { addDoc, collection, onSnapshot, orderBy, query } from "firebase/firestore";
 
 // Chat component
-const Chat = ({ route, navigation }) => {
-    const { name, background } = route.params;
+const Chat = ({ route, navigation, db }) => {
+    const { name, background, userID } = route.params; // extract name, backround, and userID from route.params
     const [messages, setMessages] = useState([]);
+
     // Upon sending new messages previous messages stay attatched
     const onSend = (newMessages) => {
-        setMessages(previousMessages => GiftedChat.append(previousMessages, newMessages))
+        // Save the first message in the newMessages array to Firestore
+        addDoc(collection(db, 'messages'), newMessages[0]);
     };
 
     // hook to update messages and append previous messages
     useEffect(() => {
-        setMessages(previousMessages => [
-            ...previousMessages,
-            {
-                _id: previousMessages.length + 1,
-                text: "Hello developer",
-                createdAt: new Date(),
-
-            },
-            {
-                _id: previousMessages.length + 2,
-                text: `Hello ${name}! How can I help you?`,
-                createdAt: new Date,
-                user: {
-                    _id: 2,
-                    name: "React Native",
-                    avatar: "https://placeimg.com/140/140/any",
-                },
-            },
-        ]);
-    }, [name]);
+        const unsubscribe = onSnapshot(
+            query(collection(db, 'messages'), orderBy('createdAt', 'desc')),
+            (snapshot) => {
+                const messages = snapshot.docs.map((doc) => {
+                    const data = doc.data();
+                    //convert timestamp to date object
+                    const createdAt = data.createdAt.toDate();
+                    return {
+                        _id: doc.id,
+                        text: data.text,
+                        createdAt,
+                        user: data.user,
+                    };
+                });
+                setMessages(messages);
+            }
+        );
+        // cleanup function
+        return () => unsubscribe();
+    }, [name, db]);
 
     // Screen Title (Username from Start.js)
     useEffect(() => {
@@ -62,6 +65,12 @@ const Chat = ({ route, navigation }) => {
         );
     };
 
+    // Update the user prop with extracted userID and name
+    const user = {
+        _id: userID, // Use the extracted userID
+        name: name, // Use the extracted name
+    };
+
     // view of Chat with Selected background from Start.js
     return (
         <View style={[styles.container, { backgroundColor: background }]}>
@@ -69,10 +78,7 @@ const Chat = ({ route, navigation }) => {
             <GiftedChat
                 messages={messages}
                 onSend={messages => onSend(messages)}
-                user={{
-                    _id: 1,
-                    name: 'You,' //sender's name
-                }}
+                user={user}
                 renderBubble={renderBubble}
             />
             {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null}
