@@ -9,7 +9,7 @@ import {
     TextInput
 } from 'react-native';
 import { Bubble, GiftedChat } from "react-native-gifted-chat";
-import { doc, addDoc, collection, onSnapshot, query, where, orderBy, } from "firebase/firestore";
+import { doc, addDoc, collection, onSnapshot, query, orderBy, } from "firebase/firestore";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Chat component
@@ -45,14 +45,13 @@ const Chat = ({ route, navigation, db, isConnected }) => {
             if (unsubMessages) unsubMessages();
             unsubMessages = null;
 
-            const q = query(collection(db, 'messages'), where(
-                'uid', '==', userID));
+            const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
             unsubMessages = onSnapshot(q, (documentsSnapshot) => {
                 let newMessages = [];
                 documentsSnapshot.forEach(doc => {
-                    newMessages.push({ id: doc.id, ...doc.data() })
+                    newMessages.push({ id: doc.id, ...doc.data(), createdAt: new Date(doc.data().createdAt.toMillis()) })
                 });
-                loadCachedMessages(newMessages);
+                //loadCachedMessages(newMessages);
                 setMessages(newMessages)
             });
         } else loadCachedMessages();
@@ -102,16 +101,6 @@ const Chat = ({ route, navigation, db, isConnected }) => {
                 renderBubble={renderBubble}
                 renderInputToolbar={renderInputToolbar}
             />
-
-            {isConnected === true &&
-                <View style={styles.messageForm}>
-                    <TextInput
-                        placeholder='type message here'
-                        value={messagesText}
-                        onChangeText={setMessagesText}
-                    />
-                </View>
-            }
             {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null}
         </View>
     );
