@@ -1,18 +1,28 @@
+import { InputToolbar } from 'react-native-gifted-chat';
 import React, { useEffect, useState } from 'react';
 import {
     StyleSheet,
     View,
     Text,
     KeyboardAvoidingView,
-    Platform
+    Platform,
+    TextInput
 } from 'react-native';
 import { Bubble, GiftedChat } from "react-native-gifted-chat";
-import { addDoc, collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { doc, addDoc, collection, onSnapshot, query, where, orderBy, } from "firebase/firestore";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Chat component
-const Chat = ({ route, navigation, db }) => {
+const Chat = ({ route, navigation, db, isConnected }) => {
     const { name, background, userID } = route.params; // extract name, backround, and userID from route.params
     const [messages, setMessages] = useState([]);
+    const [messagesText, setMessagesText] = useState('');
+
+    // renderInputToolbar
+    const renderInputToolbar = (props) => {
+        if (isConnected) return <InputToolbar {...props} />;
+        else return null;
+    };
 
     // Upon sending new messages previous messages stay attatched
     const onSend = (newMessages) => {
@@ -20,28 +30,38 @@ const Chat = ({ route, navigation, db }) => {
         addDoc(collection(db, 'messages'), newMessages[0]);
     };
 
+    const loadCachedMessages = async () => {
+        const cachedMessages = await AsyncStorage.getItem("cachedMessages") || [];
+        setMessages(JSON.parse(cachedMessages));
+    };
+
     // hook to update messages and append previous messages
     useEffect(() => {
-        const unsubscribe = onSnapshot(
-            query(collection(db, 'messages'), orderBy('createdAt', 'desc')),
-            (snapshot) => {
-                const messages = snapshot.docs.map((doc) => {
-                    const data = doc.data();
-                    //convert timestamp to date object
-                    const createdAt = data.createdAt.toDate();
-                    return {
-                        _id: doc.id,
-                        text: data.text,
-                        createdAt,
-                        user: data.user,
-                    };
+        let unsubMessages;
+        if (isConnected === true) {
+
+            //unregister current onSnapshot() listener to avoid registering
+            // multiple listeners when useEffect is re-executed
+            if (unsubMessages) unsubMessages();
+            unsubMessages = null;
+
+            const q = query(collection(db, 'messages'), where(
+                'uid', '==', userID));
+            unsubMessages = onSnapshot(q, (documentsSnapshot) => {
+                let newMessages = [];
+                documentsSnapshot.forEach(doc => {
+                    newMessages.push({ id: doc.id, ...doc.data() })
                 });
-                setMessages(messages);
-            }
-        );
+                loadCachedMessages(newMessages);
+                setMessages(newMessages)
+            });
+        } else loadCachedMessages();
+
         // cleanup function
-        return () => unsubscribe();
-    }, [name, db]);
+        return () => {
+            if (unsubMessages) unsubMessages();
+        }
+    }, [isConnected, userID]);
 
     // Screen Title (Username from Start.js)
     useEffect(() => {
@@ -80,7 +100,18 @@ const Chat = ({ route, navigation, db }) => {
                 onSend={messages => onSend(messages)}
                 user={user}
                 renderBubble={renderBubble}
+                renderInputToolbar={renderInputToolbar}
             />
+
+            {isConnected === true &&
+                <View style={styles.messageForm}>
+                    <TextInput
+                        placeholder='type message here'
+                        value={messagesText}
+                        onChangeText={setMessagesText}
+                    />
+                </View>
+            }
             {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null}
         </View>
     );
