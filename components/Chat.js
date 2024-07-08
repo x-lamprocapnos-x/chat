@@ -1,3 +1,4 @@
+// import statements
 import { InputToolbar } from 'react-native-gifted-chat';
 import React, { useEffect, useState } from 'react';
 import {
@@ -11,6 +12,8 @@ import {
 import { Bubble, GiftedChat } from "react-native-gifted-chat";
 import { doc, addDoc, collection, onSnapshot, query, orderBy, } from "firebase/firestore";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CustomActions from './CustomActions';
+import MapView from 'react-native-maps';
 
 // Chat component
 const Chat = ({ route, navigation, db, isConnected }) => {
@@ -90,6 +93,35 @@ const Chat = ({ route, navigation, db, isConnected }) => {
         name: name, // Use the extracted name
     };
 
+    //render custom actions function
+    const renderCustomActions = (props) => {
+        return <CustomActions storage={db.storage} {...props} />;
+    };
+
+    // render custom view function
+    const renderCustomView = (props) => {
+        const { currentMessage } = props;
+        if (currentMessage.location) {
+            return (
+                <MapView
+                    style={{
+                        width: 150,
+                        height: 100,
+                        borderRadius: 13,
+                        margin: 3
+                    }}
+                    region={{
+                        latitude: currentMessage.location.latitude,
+                        longitude: currentMessage.location.longitude,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421,
+                    }}
+                />
+            );
+        }
+        return null;
+    }
+
     // view of Chat with Selected background from Start.js
     return (
         <View style={[styles.container, { backgroundColor: background }]}>
@@ -100,6 +132,12 @@ const Chat = ({ route, navigation, db, isConnected }) => {
                 user={user}
                 renderBubble={renderBubble}
                 renderInputToolbar={renderInputToolbar}
+                renderActions={renderCustomActions}
+                renderCustomView={renderCustomView}
+            //user={{
+            //    _id: userID,
+            //   name
+            // }}
             />
             {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null}
         </View>
