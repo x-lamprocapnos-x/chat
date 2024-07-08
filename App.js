@@ -1,3 +1,4 @@
+//import statements
 import { StyleSheet, LogBox } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -14,6 +15,8 @@ import { useNetInfo } from '@react-native-community/netinfo';
 // initialize firebase
 import { initializeApp } from "firebase/app";
 import { getFirestore, disableNetwork, enableNetwork } from "firebase/firestore";
+
+import { getStorage } from "firebase/storage";
 
 // Create the navigator
 const Stack = createNativeStackNavigator();
@@ -47,6 +50,8 @@ const App = () => {
 
   // Initialize Cloud Firestore and get a reference to the service
   const db = getFirestore(app);
+  // Initialize storage handler
+  const storage = getStorage(app);
 
   return (
     <NavigationContainer>
@@ -62,7 +67,12 @@ const App = () => {
         <Stack.Screen
           name='Chat'
         >
-          {props => <Chat isConnected={connectionStatus.isConnected} db={db} {...props} />}
+          {props => <Chat
+            isConnected={connectionStatus.isConnected}
+            db={db}
+            storage={storage}
+            {...props}
+          />}
 
         </Stack.Screen>
       </Stack.Navigator>
