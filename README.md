@@ -85,7 +85,7 @@ We welcome contributions from the community! Follow these steps to get started:
 - est your changes before committing.
 - Write clear commit messages.
 - If adding a new feature, update the documentation where applicable.
-We appreciate your effort in improving the app! 😊
+We appreciate your effort in improving the app! 
 
 ## **License**
 This project is licensed under the MIT License.
